@@ -56,6 +56,8 @@ uv lock
 ```bash
 cd open_telemetry_test
 
+# Start Docker
+
 # Copy config yaml to container.
 # Download the image from otel and run with the config yaml.
 docker run -p 4317:4317 \
