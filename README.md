@@ -49,6 +49,27 @@ uv add --dev <dev_lib>
 uv lock
 ```
 
+## Running app with Open Telemetry
+
+* Based on Open Telemetry [documentation](https://opentelemetry.io/docs/languages/python/getting-started/) .
+
+```bash
+cd open_telemetry_test
+
+# Copy config yaml to container.
+# Download the image from otel and run with the config yaml.
+docker run -p 4317:4317 \
+  -v ./otel-collector-config.yaml:/etc/otel-collector-config.yaml \
+  otel/opentelemetry-collector:latest \
+  --config=/etc/otel-collector-config.yaml
+
+# Now run the app with the following command
+opentelemetry-instrument --logs_exporter otlp flask run -p 8080
+
+# App can be accessed at http://localhost:8080/rolldice
+```
+
+
 ## 🏃 Run tests
 
 * pytest settings are in the `pyproject.toml` file so everything does not need to be specified in the command line.
