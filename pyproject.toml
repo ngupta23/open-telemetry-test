@@ -5,7 +5,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "flask>=3.1.0",
     "numpy",
+    "opentelemetry-distro>=0.53b1",
+    "opentelemetry-exporter-otlp>=1.32.1",
+    "pip>=25.0.1",
 ]
 
 [dependency-groups]

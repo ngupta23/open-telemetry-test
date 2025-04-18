@@ -26,6 +26,13 @@ source .venv/bin/activate
 make devenv
 ```
 
+### Install open temeletry
+
+```bash
+# Run after make devenv
+uv run opentelemetry-bootstrap -a install
+```
+
 ## 🔄 Update Dependencies
 
 If you want to add or update dependencies, you can do so using the `uv` command. This will update the `pyproject.toml` file and the lock file.
