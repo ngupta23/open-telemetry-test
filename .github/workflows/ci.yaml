@@ -30,7 +30,7 @@ jobs:
         run: pip install uv && make devenv
 
       - name: Check import
-        run: python -c "from python_uv_template.hello import main"
+        run: python -c "from open_telemetry_test.hello import main"
 
       - name: Run pytest in a distributed manner
         run: |

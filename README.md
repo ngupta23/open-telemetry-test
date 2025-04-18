@@ -1,7 +1,7 @@
-[![lint](https://github.com/ngupta23/python_uv_template/actions/workflows/lint.yaml/badge.svg)](https://github.com/ngupta23/python_uv_template/actions/workflows/lint.yaml)
-[![CI](https://github.com/ngupta23/python_uv_template/actions/workflows/ci.yaml/badge.svg)](https://github.com/ngupta23/python_uv_template/actions/workflows/ci.yaml)
+[![lint](https://github.com/ngupta23/open_telemetry_test/actions/workflows/lint.yaml/badge.svg)](https://github.com/ngupta23/open_telemetry_test/actions/workflows/lint.yaml)
+[![CI](https://github.com/ngupta23/open_telemetry_test/actions/workflows/ci.yaml/badge.svg)](https://github.com/ngupta23/open_telemetry_test/actions/workflows/ci.yaml)
 
-# python_uv_template
+# open_telemetry_test
 A template for initializing a python repository managed with `uv`
 
 ## 🛠️ Create the Development Environment & 🔧 Install Pre-commit Hooks

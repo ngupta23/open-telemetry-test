@@ -299,7 +299,7 @@ wheels = [
 ]
 
 [[package]]
-name = "python-uv-template"
+name = "open-telemetry-test"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

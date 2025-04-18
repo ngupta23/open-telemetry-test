@@ -1,5 +1,5 @@
 [project]
-name = "python-uv-template"
+name = "open-telemetry-test"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -22,11 +22,11 @@ requires = ["setuptools >= 61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["python_uv_template"]
+packages = ["open_telemetry_test"]
 
 [tool.coverage]
 branch = true
-source = ["python_uv_template"]
+source = ["open_telemetry_test"]
 
 [tool.coverage.run]
 omit = [
@@ -57,7 +57,7 @@ addopts = """
 [tool.ruff]
 fix = true
 line-length = 88
-src = ["python_uv_template"]
+src = ["open_telemetry_test"]
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -67,5 +67,5 @@ docstring-code-line-length = 20
 select = ["E", "F", "UP", "B", "SIM", "I"]
 
 [tool.ruff.lint.isort]
-known-local-folder = ["python_uv_template"]
+known-local-folder = ["open_telemetry_test"]
 no-lines-before = ["local-folder"]
