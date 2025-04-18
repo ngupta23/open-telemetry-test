@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false  # don't fail all groups if one group fails.
+      matrix:
+        group: [1, 2, 3, 4]
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install pip requirements
+        run: pip install uv && make devenv
+
+      - name: Check import
+        run: python -c "from python_uv_template.hello import main"
+
+      - name: Run pytest in a distributed manner
+        run: |
+          COVERAGE_FILE=${{ github.workspace }}/coverage.${{ matrix.group }} \
+          SPLITS=4 GROUP=${{ matrix.group }} \
+          make split-tests
+
+      - name: Available coverage file
+        run: ls -lah ${{ github.workspace }}/coverage.*
+
+      - name: Upload coverage file
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.group }}  # folder to store artifact in
+          path: ${{ github.workspace }}/coverage.${{ matrix.group }}  # file name to upload under the folder (should be raw coverage file not XML)
+
+  coverage:
+    needs: run-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install deps
+        run: pip install uv && make devenv
+
+      - name: Download coverage files
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*  # download all artifacts with the folder coverage-*
+          merge-multiple: true  # combine all the artifact files into one folder
+          path: coverage-reports/  # store combined files under this folder
+
+      - name: Available coverage files
+        run: ls -lah coverage-reports/
+
+      - name: Run coverage check
+        run: |
+          uv run coverage combine coverage-reports/*
+          uv run coverage report --fail-under=80

@@ -1,0 +1,71 @@
+[project]
+name = "python-uv-template"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.1",
+    "pytest-rerunfailures>=15.0",
+    "pytest-split>=0.10.0",
+]
+
+[build-system]
+requires = ["setuptools >= 61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["python_uv_template"]
+
+[tool.coverage]
+branch = true
+source = ["python_uv_template"]
+
+[tool.coverage.run]
+omit = [
+    "tests/*"
+]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+# Reruns = 10, with delay = 5 seconds between each rerun (for flaky tests)
+# Fail if coverage is less than 0% for each split since  we are using a global
+# coverage of 80% above
+addopts = """
+  --reruns 10
+  --reruns-delay 5
+  -v
+  --durations=0
+  --cov
+  --cov-report=term
+  --cov-report=
+  --cov-fail-under=0
+"""
+
+[tool.ruff]
+fix = true
+line-length = 88
+src = ["python_uv_template"]
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 20
+
+[tool.ruff.lint]
+select = ["E", "F", "UP", "B", "SIM", "I"]
+
+[tool.ruff.lint.isort]
+known-local-folder = ["python_uv_template"]
+no-lines-before = ["local-folder"]
