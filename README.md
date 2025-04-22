@@ -56,19 +56,21 @@ uv lock
 ```bash
 cd open_telemetry_test
 
-# Start Docker
+# Step 1: Start Docker
 
-# Copy config yaml to container.
-# Download the image from otel and run with the config yaml.
+# Step 2: Start the collector
+# Copy config yaml to container, download the image from otel & run with the config.
 docker run -p 4317:4317 \
   -v ./otel-collector-config.yaml:/etc/otel-collector-config.yaml \
   otel/opentelemetry-collector:latest \
   --config=/etc/otel-collector-config.yaml
 
-# Now run the app with the following command
+# Step 3A: Now run the app with the following command
+# App can be accessed at http://localhost:8080/rolldice
 opentelemetry-instrument --logs_exporter otlp flask run -p 8080
 
-# App can be accessed at http://localhost:8080/rolldice
+# Step 3B: Alternately, run the following python script
+opentelemetry-instrument --logs_exporter otlp python online_anomaly_detection.py
 ```
 
 
