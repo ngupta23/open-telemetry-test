@@ -33,6 +33,16 @@ make devenv
 uv run opentelemetry-bootstrap -a install
 ```
 
+### Add the NIXTLA API KEY
+
+1. Create an `.env` file in the root directory of the project.
+2. Add the following line to the `.env` file:
+
+```bash
+# .env
+NIXTLA_API_KEY=<your_api_key>
+```
+
 ## 🔄 Update Dependencies
 
 If you want to add or update dependencies, you can do so using the `uv` command. This will update the `pyproject.toml` file and the lock file.
