@@ -46,13 +46,11 @@ with tracer.start_as_current_span("detect_anomaly") as detect_anomaly:
     )
 
     current_time = df["ts"].max().isoformat()
-    # current_time = int(current_time.timestamp())
     detect_anomaly.set_attribute("current_time", current_time)
 
-    # Track counts of anomalies per unique_id
     anomaly_counts = anomaly_online.query("anomaly == True").groupby("unique_id").size()
 
-    # Emit the metrics
+    # Capture the metrics
     for unique_id, count in anomaly_counts.items():
         anomaly_counter_per_id.add(
             # convert numpy.int64 to plain int
@@ -60,6 +58,7 @@ with tracer.start_as_current_span("detect_anomaly") as detect_anomaly:
             {"unique_id": str(unique_id)},
         )
 
-    # convert numpy.int64 to plain int
+    # NOTE: convert numpy.int64 to plain int since
+    # open-telemetry does not support numpy types.
     total_anomalies = int(anomaly_counts.sum())
     anomaly_counter_overall.add(total_anomalies, {"unique_id": "ALL"})
