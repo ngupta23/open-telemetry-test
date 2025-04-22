@@ -26,7 +26,7 @@ source .venv/bin/activate
 make devenv
 ```
 
-### Install open temeletry
+### Install open telemetry
 
 ```bash
 # Run after make devenv
