@@ -35,13 +35,9 @@ uv run opentelemetry-bootstrap -a install
 
 ### Add the NIXTLA API KEY
 
-1. Create an `.env` file in the root directory of the project.
-2. Add the following line to the `.env` file:
+1. Copy the `.env.example` file and rename it to `.env`.
+2. Fill the values for the various env variables. These are necessary for the various scripts to run.
 
-```bash
-# .env
-NIXTLA_API_KEY=<your_api_key>
-```
 
 ## 🔄 Update Dependencies
 
