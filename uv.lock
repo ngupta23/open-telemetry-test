@@ -639,6 +639,8 @@ dependencies = [
     { name = "opentelemetry-exporter-otlp" },
     { name = "pip" },
     { name = "python-dotenv" },
+    { name = "resend" },
+    { name = "utilsforecast" },
 ]
 
 [package.dev-dependencies]
@@ -659,6 +661,8 @@ requires-dist = [
     { name = "opentelemetry-exporter-otlp", specifier = ">=1.32.1" },
     { name = "pip", specifier = ">=25.0.1" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
+    { name = "resend", specifier = ">=2.7.0" },
+    { name = "utilsforecast", specifier = ">=0.2.12" },
 ]
 
 [package.metadata.requires-dev]
@@ -1241,6 +1245,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/63/70/2bf7780ad2d390a8d301ad0b550f1581eadbd9a20f896afe06353c2a2913/requests-2.32.3.tar.gz", hash = "sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760", size = 131218 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f9/9b/335f9764261e915ed497fcdeb11df5dfd6f7bf257d4a6a2a686d80da4d54/requests-2.32.3-py3-none-any.whl", hash = "sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6", size = 64928 },
+]
+
+[[package]]
+name = "resend"
+version = "2.7.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b5/49/7f5000d5e0ed6d238b55c49706c49a3733a38d81164c236bc6438aa988a8/resend-2.7.0.tar.gz", hash = "sha256:b419cd9125a0c180bb8e60453ee524e04cb1d067b14ad63ae53ee2e3886ead02", size = 13285 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/af/3f/23a2f98a53f7d9f940458d9c7e4abf823f1c268eee379a8a97beb360bbaf/resend-2.7.0-py2.py3-none-any.whl", hash = "sha256:104b34d3781b42593299633839e709e88056949e62fbcc915a937f5aad0678b2", size = 19819 },
 ]
 
 [[package]]
