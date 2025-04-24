@@ -34,16 +34,49 @@ def get_sentry_events_data():
         "Authorization": f"Bearer {SENTRY_AUTH_TOKEN}",
         "Content-Type": "application/json",
     }
-    url = f"https://sentry.io/api/0/projects/{ORG_SLUG}/{PROJECT_SLUG}/events/"
+
+    # TODO: Queries only returns 100 entries.
+    # May have to use pagination to get all within a certain time frame
+    # Ref: https://docs.sentry.io/api/pagination/
+
+    # # Project specific query (limited in filtering capabilities)
+    # # Ref: https://docs.sentry.io/api/events/list-a-projects-issues/
+    # url = f"https://sentry.io/api/0/projects/{ORG_SLUG}/{PROJECT_SLUG}/events/"
+
+    # # Organization specific query (more detailed filtering capabilities)
+    # # Ref: https://docs.sentry.io/api/events/list-an-organizations-issues/
+    # # Events API
+    # url = (
+    #     f"https://sentry.io/api/0/organizations/{ORG_SLUG}/events/"
+    #     "?query="
+    #     f"event.type:error&project:{PROJECT_SLUG}"
+    #     "&field=title&field=project&field=user&field=timestamp"
+    #     "&sort=-timestamp"
+    # )
+
+    # Event Stats API
+    url = (
+        f"https://sentry.io/api/0/organizations/{ORG_SLUG}/events-stats/"
+        "?query="
+        f"event.type:error&project:{PROJECT_SLUG}"
+        "&field=title&field=project&field=user&field=timestamp"
+        "&interval=5m&statsPeriod=1d"
+        "&sort=-timestamp"
+    )
+
     response = requests.get(url, headers=headers)
 
     # Process events data ----
-    events = pd.DataFrame(response.json())
-    events[TIME_COL] = pd.to_datetime(events[TIME_COL])
+    events = pd.DataFrame(
+        [(ts, count[0]["count"]) for ts, count in response.json().get("data")],
+        columns=[TIME_COL, TARGET_COL],
+    )
+    events[TIME_COL] = pd.to_datetime(events[TIME_COL], unit="s")
+    events[ID_COL] = PROJECT_SLUG
 
-    metadata_df = events["metadata"].apply(pd.Series)
-    metadata_df = metadata_df.add_prefix("metadata.")  # or use .add_suffix('_meta')
-    events = pd.concat([events.drop(columns=["metadata"]), metadata_df], axis=1)
+    # metadata_df = events["metadata"].apply(pd.Series)
+    # metadata_df = metadata_df.add_prefix("metadata.")
+    # events = pd.concat([events.drop(columns=["metadata"]), metadata_df], axis=1)
 
     return events
 
@@ -72,7 +105,8 @@ def extract_error_data(events: pd.DataFrame) -> pd.DataFrame:
 def summarize(anomaly_online: pd.DataFrame) -> pd.DataFrame:
     # Summarize anomalies ----
     anomaly_summary = (
-        anomaly_online.groupby(ID_COL)
+        anomaly_online.query("anomaly == True")
+        .groupby(ID_COL)
         .agg({"anomaly": "sum", TIME_COL: "max", TARGET_COL: "last"})
         .reset_index()
         .rename(columns={TIME_COL: "last_time", TARGET_COL: "last_value"})
@@ -104,10 +138,10 @@ def report_anomalies(anomaly_summary):
 
 
 # Step 1: Retrieve Sentry events ----
-events = get_sentry_events_data()
+error_events = get_sentry_events_data()
 
-# Step 2: Extract error events ----
-error_events = extract_error_data(events=events)
+# # Step 2: Extract error events ----
+# error_events = extract_error_data(events=events)
 
 # Step 3: Detect anomalies ----
 anomaly_online = nixtla_client.detect_anomalies_online(
