@@ -35,48 +35,28 @@ def get_sentry_events_data():
         "Content-Type": "application/json",
     }
 
-    # TODO: Queries only returns 100 entries.
-    # May have to use pagination to get all within a certain time frame
-    # Ref: https://docs.sentry.io/api/pagination/
-
-    # # Project specific query (limited in filtering capabilities)
-    # # Ref: https://docs.sentry.io/api/events/list-a-projects-issues/
-    # url = f"https://sentry.io/api/0/projects/{ORG_SLUG}/{PROJECT_SLUG}/events/"
-
-    # # Organization specific query (more detailed filtering capabilities)
-    # # Ref: https://docs.sentry.io/api/events/list-an-organizations-issues/
-    # # Events API
-    # url = (
-    #     f"https://sentry.io/api/0/organizations/{ORG_SLUG}/events/"
-    #     "?query="
-    #     f"event.type:error&project:{PROJECT_SLUG}"
-    #     "&field=title&field=project&field=user&field=timestamp"
-    #     "&sort=-timestamp"
-    # )
-
-    # Event Stats API
+    # category = error, span_indexed, transaction_indexed, span, transaction
     url = (
-        f"https://sentry.io/api/0/organizations/{ORG_SLUG}/events-stats/"
+        f"https://sentry.io/api/0/organizations/{ORG_SLUG}/stats_v2/"
         "?query="
-        f"event.type:error&project:{PROJECT_SLUG}"
-        "&field=title&field=project&field=user&field=timestamp"
-        "&interval=5m&statsPeriod=1d"
-        "&sort=-timestamp"
+        f"project:{PROJECT_SLUG}"
+        "&interval=5m"
+        "&statsPeriod=1d"
+        "&groupBy=category"
+        "&category=error"
+        "&field=sum(quantity)"
     )
-
     response = requests.get(url, headers=headers)
 
     # Process events data ----
     events = pd.DataFrame(
-        [(ts, count[0]["count"]) for ts, count in response.json().get("data")],
-        columns=[TIME_COL, TARGET_COL],
+        {
+            TIME_COL: response.json().get("intervals"),
+            TARGET_COL: response.json().get("groups")[0]["series"]["sum(quantity)"],
+        }
     )
-    events[TIME_COL] = pd.to_datetime(events[TIME_COL], unit="s")
+    events[TIME_COL] = pd.to_datetime(events[TIME_COL])
     events[ID_COL] = PROJECT_SLUG
-
-    # metadata_df = events["metadata"].apply(pd.Series)
-    # metadata_df = metadata_df.add_prefix("metadata.")
-    # events = pd.concat([events.drop(columns=["metadata"]), metadata_df], axis=1)
 
     return events
 
