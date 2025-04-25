@@ -29,7 +29,17 @@ TARGET_COL = "event_count"
 current_time = pd.Timestamp.now(tz="UTC").floor(FREQ).strftime("%Y-%m-%d %H:%M")
 
 
-def get_sentry_events_data():
+def get_sentry_events_data() -> pd.DataFrame:
+    """Get the sentry events data from the Sentry API.
+
+    Refer to https://github.com/ngupta23/Data-Science-Knowlege-Base/issues/212
+    for details on various endpoints and their usage.
+
+    Returns
+    -------
+    pd.DataFrame
+        Sentry events data
+    """
     headers = {
         "Authorization": f"Bearer {SENTRY_AUTH_TOKEN}",
         "Content-Type": "application/json",
