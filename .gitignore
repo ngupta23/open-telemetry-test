@@ -164,3 +164,7 @@ cython_debug/
 # VSCode
 *.code-workspace
 .vscode/
+
+# Prometheus
+/open_telemetry_test/prometheus/data/*
+/open_telemetry_test/prometheus/prometheus-3.3.0.linux-amd64*

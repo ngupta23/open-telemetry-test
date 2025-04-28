@@ -33,6 +33,13 @@ make devenv
 uv run opentelemetry-bootstrap -a install
 ```
 
+### Install prometheus
+
+```bash
+# Run after make devenv
+make setup-prometheus
+```
+
 ### Add the NIXTLA API KEY
 
 1. Copy the `.env.example` file and rename it to `.env`.
@@ -78,6 +85,24 @@ opentelemetry-instrument --logs_exporter otlp flask run -p 8080
 # Step 3B: Alternately, run the following python script
 opentelemetry-instrument --logs_exporter otlp python online_anomaly_detection.py
 ```
+
+## Collecting metrics with Prometheus
+
+Make sure that the prometheus server is running and that the config file is set up correctly. The config file is in the `prometheus` folder.
+
+```bash
+# Start the prometheus server
+make start-prometheus
+
+# Run the script to collect metrics
+# This will expose the metrics at http://localhost:8000/metrics
+# which will be read by prometheus (see config in prometheus_predictive.yaml).
+uv run python open_telemetry_test/prometheus/prometheus_predictive.py
+
+# You can query the metrics using PromQL by running the following script
+uv run python open_telemetry_test/prometheus/prometheus_read_metrics.py
+```
+
 
 
 ## 🏃 Run tests
