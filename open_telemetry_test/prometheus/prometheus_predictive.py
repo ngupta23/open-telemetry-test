@@ -1,7 +1,8 @@
-import random
 import time
 
 from prometheus_client import Gauge, start_http_server
+
+from open_telemetry_test.prometheus.predictive_common import collect_vibration_data
 
 # Create a Gauge metric for vibration
 vibration_gauge = Gauge(
@@ -11,12 +12,6 @@ vibration_gauge = Gauge(
         "machine_id"
     ],  # labels to use, e.g. machine_id="machine_1", "machine_id=machine_2", etc
 )
-
-
-def collect_vibration_data():
-    # Simulate collecting vibration data
-    return random.uniform(0, 5)  # Replace with actual sensor reading
-
 
 if __name__ == "__main__":
     # Start HTTP server on port 8000

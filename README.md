@@ -90,16 +90,34 @@ opentelemetry-instrument --logs_exporter otlp python online_anomaly_detection.py
 
 Make sure that the prometheus server is running and that the config file is set up correctly. The config file is in the `prometheus` folder.
 
-```bash
-# Start the prometheus server
-make start-prometheus
+### Step 1: Start the prometheus server
 
-# Run the script to collect metrics
-# This will expose the metrics at http://localhost:8000/metrics
-# which will be read by prometheus (see config in prometheus_predictive.yaml).
+```bash
+
+# This used prometheus_predictive.yaml as the config file
+# which reads the metrics from http://localhost:8000/metrics
+make start-prometheus
+```
+
+### Step 2: Run the script to collect metrics
+
+* These scripts will expose the metrics at http://localhost:8000/metrics which will be read by prometheus (see config in prometheus_predictive.yaml).
+
+We have 2 options
+
+```bash
+# Option 1: Use Prometheus native SDK (tool specific)
 uv run python open_telemetry_test/prometheus/prometheus_predictive.py
 
-# You can query the metrics using PromQL by running the following script
+# Option 2: Use Open Telemetry SDK (preferred since it can export to other tools as well)
+uv run python open_telemetry_test/prometheus/prometheus_predictive_otel.py
+```
+
+### Step 3: Read Metrics
+
+You can query the metrics using PromQL by running the following script
+
+```bash
 uv run python open_telemetry_test/prometheus/prometheus_read_metrics.py
 ```
 

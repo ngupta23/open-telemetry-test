@@ -920,6 +920,7 @@ dependencies = [
     { name = "numpy" },
     { name = "opentelemetry-distro" },
     { name = "opentelemetry-exporter-otlp" },
+    { name = "opentelemetry-exporter-prometheus" },
     { name = "pip" },
     { name = "prometheus-api-client" },
     { name = "prometheus-client" },
@@ -944,6 +945,7 @@ requires-dist = [
     { name = "numpy" },
     { name = "opentelemetry-distro", specifier = ">=0.53b1" },
     { name = "opentelemetry-exporter-otlp", specifier = ">=1.32.1" },
+    { name = "opentelemetry-exporter-prometheus", specifier = ">=0.53b1" },
     { name = "pip", specifier = ">=25.0.1" },
     { name = "prometheus-api-client", specifier = ">=0.6.0" },
     { name = "prometheus-client", specifier = ">=0.21.1" },
@@ -1047,6 +1049,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/7b/b1/35d88066d628c469ec5152c4b8f072cc203c13c55d591df190ba91eaea13/opentelemetry_exporter_otlp_proto_http-1.32.1.tar.gz", hash = "sha256:f854a6e7128858213850dbf1929478a802faf50e799ffd2eb4d7424390023828", size = 15133 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/01/75/73f96e43431c7ed4deac7a61820f218b0a8e75d2ad6ba78c354b16a9c730/opentelemetry_exporter_otlp_proto_http-1.32.1-py3-none-any.whl", hash = "sha256:3cc048b0c295aa2cbafb883feaf217c7525b396567eeeabb5459affb08b7fefe", size = 17242 },
+]
+
+[[package]]
+name = "opentelemetry-exporter-prometheus"
+version = "0.53b1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-sdk" },
+    { name = "prometheus-client" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5d/e5/a1f2878c0a4f4d7a5ba677016d020afc2ebce24cea0d4984f129d60ee3ca/opentelemetry_exporter_prometheus-0.53b1.tar.gz", hash = "sha256:19657c9e38785d5e999110157ef3336e4f3f6c114af070e72ac24a8a30e5bcdd", size = 14952 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7a/84/7a7aae8b2f4380b3d58c2351ffa2b3ff43cd5e78977e3c2db5da5947208a/opentelemetry_exporter_prometheus-0.53b1-py3-none-any.whl", hash = "sha256:0441174c0cde7529640dd96e5d73b16c06ba3a02b4411a9b4da784f4c892c643", size = 12951 },
 ]
 
 [[package]]

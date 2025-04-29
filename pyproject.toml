@@ -10,6 +10,7 @@ dependencies = [
     "numpy",
     "opentelemetry-distro>=0.53b1",
     "opentelemetry-exporter-otlp>=1.32.1",
+    "opentelemetry-exporter-prometheus>=0.53b1",
     "pip>=25.0.1",
     "prometheus-api-client>=0.6.0",
     "prometheus-client>=0.21.1",
