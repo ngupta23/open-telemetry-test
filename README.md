@@ -62,7 +62,7 @@ uv add --dev <dev_lib>
 uv lock
 ```
 
-## Running app with Open Telemetry
+## Running basic app with Open Telemetry
 
 * Based on Open Telemetry [documentation](https://opentelemetry.io/docs/languages/python/getting-started/) .
 
@@ -110,6 +110,7 @@ We have 2 options
 uv run python open_telemetry_test/prometheus/prometheus_predictive.py
 
 # Option 2: Use Open Telemetry SDK (preferred since it can export to other tools as well)
+# This still mixes the prometheus SDK with Open Telemetry SDK in code, hence it is not the best option.
 uv run python open_telemetry_test/prometheus/prometheus_predictive_otel.py
 ```
 
@@ -121,6 +122,47 @@ You can query the metrics using PromQL by running the following script
 uv run python open_telemetry_test/prometheus/prometheus_read_metrics.py
 ```
 
+
+## Using OTEL as a common collector (PREFERRED)
+
+* This is the preferred method since we use OTEL as a common collector and then export the data to other tools.
+
+
+### Step 1: Start Prometheus
+
+* With custom settings (e.g. reading metrics every 15 seconds instead of the default 1 min)
+  - This starts prometheus at http://localhost:9090/ where you can query the metrics
+  - It will look for localhost:8000/metrics to scrape metrics
+
+```bash
+make start-prometheus
+```
+
+### Step 2: Start docker
+
+
+### Step 3: Run the docker image with ports forwarded
+  * 8000 is for Prometheus to parse metrics
+  * rest are for OTEL
+
+```bash
+make start-otel-common-docker
+```
+
+### Step 4: Start collecting metrics using OTEL
+
+* This will also expose localhost:8000/metrics since we started docker with a config to indicate this endpoint
+  - NOTE: This may take some time to show the metrics - it is not instantaneous.
+
+```bash
+uv run python open_telemetry_test/otel_common/otel_predictive.py
+```
+
+### Step 5: Programmatically pull metrics
+
+```bash
+uv run python open_telemetry_test/prometheus/prometheus_read_metrics.py --metric_prefix=otel_
+```
 
 
 ## 🏃 Run tests

@@ -17,3 +17,10 @@ setup-prometheus:
 start-prometheus:
 	cd open_telemetry_test/prometheus && \
 	prometheus-3.3.0.linux-amd64/prometheus --config.file=prometheus_predictive.yaml
+
+start-otel-common-docker:
+	cd open_telemetry_test/otel_common && \
+	docker run --rm -p 4317:4317 -p 4318:4318 -p 8000:8000 \
+   		-v ./otel_common_collector_config.yaml:/etc/otelcol-contrib/config.yaml \
+   		otel/opentelemetry-collector-contrib:latest \
+   		--config /etc/otelcol-contrib/config.yaml
