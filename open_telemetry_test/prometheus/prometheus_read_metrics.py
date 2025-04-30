@@ -1,3 +1,4 @@
+import argparse
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -9,9 +10,6 @@ prom = PrometheusConnect(url="http://localhost:9090", disable_ssl=True)
 # Define time range
 end_time = datetime.now()
 start_time = end_time - timedelta(minutes=10)
-
-
-query = 'machine_vibration_acceleration{machine_id="machine_1"}'
 
 
 def get_metric(query: str) -> pd.DataFrame:
@@ -63,13 +61,35 @@ def get_average_metric(query: str, step: str) -> pd.DataFrame:
     return metric_avg
 
 
-# PromQL query for your metric (raw metrics)
-query = 'machine_vibration_acceleration{machine_id="machine_1"}'
-metric = get_metric(query)
-print(metric)
+if __name__ == "__main__":
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        description="Fetch Prometheus metrics with a given prefix."
+    )
+    parser.add_argument(
+        "--metric_prefix",
+        type=str,
+        default="",
+        help="The prefix of the metric to query.",
+    )
+    args = parser.parse_args()
 
-# Average for the last 30s
-# PromQL query for your metric (average over time)
-query = 'avg_over_time(machine_vibration_acceleration{machine_id="machine_1"}[30s])'
-metric_avg = get_average_metric(query, step="60s")
-print(metric_avg)
+    metric_prefix = args.metric_prefix
+    print(f"Metric Prefix: {metric_prefix}")
+
+    # PromQL query for your metric (raw metrics)
+    query = f'{metric_prefix}machine_vibration_acceleration{{machine_id="machine_1"}}'
+    print(f"Raw Query: {query}")
+    metric = get_metric(query)
+    print(metric)
+
+    # Average for the last 30s
+    # PromQL query for your metric (average over time)
+    query = (
+        f"avg_over_time("
+        f'{metric_prefix}machine_vibration_acceleration{{machine_id="machine_1"}}[30s]'
+        ")"
+    )
+    print(f"Average Query: {query}")
+    metric_avg = get_average_metric(query, step="60s")
+    print(metric_avg)
