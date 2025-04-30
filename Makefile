@@ -20,7 +20,9 @@ start-prometheus:
 
 start-otel-common-docker:
 	cd open_telemetry_test/otel_common && \
-	docker run --rm -p 4317:4317 -p 4318:4318 -p 8000:8000 \
+	docker run --rm \
+		--env-file ../../.env \
+		-p 4317:4317 -p 4318:4318 -p 8000:8000 \
    		-v ./otel_common_collector_config.yaml:/etc/otelcol-contrib/config.yaml \
    		otel/opentelemetry-collector-contrib:latest \
    		--config /etc/otelcol-contrib/config.yaml

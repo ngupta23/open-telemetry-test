@@ -12,7 +12,9 @@ processors:
 exporters:
   prometheus:
     endpoint: 0.0.0.0:8000
-    namespace: otel
+    namespace: otel # appended to metric names with an _ at the end
+  sentry:
+    dsn: ${SENTRY_DSN}
   debug:
     verbosity: detailed
 
@@ -21,4 +23,10 @@ service:
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [prometheus]
+      # metrics export is not supported by sentry
+      # collector server run finished with error: failed to build pipelines: failed to create "sentry" exporter for data type "metrics": telemetry type is not supported
+      exporters: [prometheus, debug]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [sentry, debug]
