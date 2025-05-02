@@ -1,3 +1,7 @@
+"""
+Script uses Prometheus Client directly to scrape metrics (no OTEL involved).
+"""
+
 import time
 
 from prometheus_client import Gauge, start_http_server

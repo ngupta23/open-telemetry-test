@@ -1,3 +1,12 @@
+"""
+Script uses OTEL to collect metrics.
+
+Prometheus client is used (in script directly) to scrape the metrics. This does
+not leverage the OTEL config YML file, hence the code is specific to Prometheus.
+For a more generic solution, refer to the otel_common module which utilizes the
+OTEL config YAML to pass data to multiple exporter (such as Prometheus and Sentry).
+"""
+
 import time
 from threading import Lock
 
