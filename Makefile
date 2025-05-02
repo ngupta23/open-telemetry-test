@@ -12,7 +12,8 @@ setup-prometheus:
 	sudo apt update
 	cd open_telemetry_test/prometheus && \
 	wget https://github.com/prometheus/prometheus/releases/download/v3.3.0/prometheus-3.3.0.linux-amd64.tar.gz && \
-	tar xvfz prometheus-*.tar.gz
+	tar xvfz prometheus-*.tar.gz && \
+	rm prometheus-*.tar.gz
 
 start-prometheus:
 	cd open_telemetry_test/prometheus && \
