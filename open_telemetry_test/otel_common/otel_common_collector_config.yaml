@@ -24,7 +24,12 @@ service:
       receivers: [otlp]
       processors: [batch]
       # metrics export is not supported by sentry
-      # collector server run finished with error: failed to build pipelines: failed to create "sentry" exporter for data type "metrics": telemetry type is not supported
+      # Error Message:
+      #   collector server run finished with error: failed to build pipelines:
+      #   failed to create "sentry" exporter for data type "metrics":
+      #   telemetry type is not supported
+      # Also, metrics solution seems to be retired as of Oct 7th
+      #  https://docs.sentry.io/platforms/python/metrics/
       exporters: [prometheus, debug]
     traces:
       receivers: [otlp]
