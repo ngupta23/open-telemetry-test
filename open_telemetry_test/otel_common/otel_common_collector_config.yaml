@@ -28,7 +28,7 @@ service:
       #   collector server run finished with error: failed to build pipelines:
       #   failed to create "sentry" exporter for data type "metrics":
       #   telemetry type is not supported
-      # Also, metrics solution seems to be retired as of Oct 7th
+      # Also, metrics solution seems to be retired as of Oct 7th, 2024
       #  https://docs.sentry.io/platforms/python/metrics/
       exporters: [prometheus, debug]
     traces:
