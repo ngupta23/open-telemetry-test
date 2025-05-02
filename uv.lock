@@ -926,6 +926,7 @@ dependencies = [
     { name = "prometheus-client" },
     { name = "python-dotenv" },
     { name = "resend" },
+    { name = "sentry-sdk" },
     { name = "utilsforecast" },
 ]
 
@@ -951,6 +952,7 @@ requires-dist = [
     { name = "prometheus-client", specifier = ">=0.21.1" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "resend", specifier = ">=2.7.0" },
+    { name = "sentry-sdk", specifier = ">=2.27.0" },
     { name = "utilsforecast", specifier = ">=0.2.12" },
 ]
 
@@ -1742,6 +1744,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/b5/49/7f5000d5e0ed6d238b55c49706c49a3733a38d81164c236bc6438aa988a8/resend-2.7.0.tar.gz", hash = "sha256:b419cd9125a0c180bb8e60453ee524e04cb1d067b14ad63ae53ee2e3886ead02", size = 13285 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/af/3f/23a2f98a53f7d9f940458d9c7e4abf823f1c268eee379a8a97beb360bbaf/resend-2.7.0-py2.py3-none-any.whl", hash = "sha256:104b34d3781b42593299633839e709e88056949e62fbcc915a937f5aad0678b2", size = 19819 },
+]
+
+[[package]]
+name = "sentry-sdk"
+version = "2.27.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "certifi" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cf/b6/a92ae6fa6d7e6e536bc586776b1669b84fb724dfe21b8ff08297f2d7c969/sentry_sdk-2.27.0.tar.gz", hash = "sha256:90f4f883f9eff294aff59af3d58c2d1b64e3927b28d5ada2b9b41f5aeda47daf", size = 323556 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/dd/8b/fb496a45854e37930b57564a20fb8e90dd0f8b6add0491527c00f2163b00/sentry_sdk-2.27.0-py2.py3-none-any.whl", hash = "sha256:c58935bfff8af6a0856d37e8adebdbc7b3281c2b632ec823ef03cd108d216ff0", size = 340786 },
 ]
 
 [[package]]

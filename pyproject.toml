@@ -16,6 +16,7 @@ dependencies = [
     "prometheus-client>=0.21.1",
     "python-dotenv>=1.1.0",
     "resend>=2.7.0",
+    "sentry-sdk>=2.27.0",
     "utilsforecast>=0.2.12",
 ]
 
