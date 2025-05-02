@@ -2,7 +2,7 @@ import time
 
 from prometheus_client import Gauge, start_http_server
 
-from open_telemetry_test.prometheus.predictive_common import collect_vibration_data
+from open_telemetry_test.predictive.predictive_common import collect_vibration_data
 
 # Create a Gauge metric for vibration
 vibration_gauge = Gauge(

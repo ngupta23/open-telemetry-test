@@ -6,7 +6,7 @@ from opentelemetry.exporter.prometheus import PrometheusMetricReader
 from opentelemetry.sdk.metrics import MeterProvider
 from prometheus_client import start_http_server
 
-from open_telemetry_test.prometheus.predictive_common import collect_vibration_data
+from open_telemetry_test.predictive.predictive_common import collect_vibration_data
 
 # Start Prometheus server on port 8000
 start_http_server(port=8000)

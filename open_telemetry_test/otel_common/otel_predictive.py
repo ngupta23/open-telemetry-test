@@ -9,7 +9,7 @@ from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-from open_telemetry_test.prometheus.predictive_common import collect_vibration_data
+from open_telemetry_test.predictive.predictive_common import collect_vibration_data
 
 TIME_SECS = 5
 
