@@ -46,17 +46,42 @@ def get_sentry_events_data() -> pd.DataFrame:
     }
 
     # category = error, span_indexed, transaction_indexed, span, transaction
+    # url = (
+    #     f"https://sentry.io/api/0/organizations/{ORG_SLUG}/stats_v2/"
+    #     "?query="
+    #     f"project:{PROJECT_SLUG}"
+    #     "&interval=5m"
+    #     "&statsPeriod=1d"
+    #     "&groupBy=category"
+    #     "&category=error"
+    #     "&field=sum(quantity)"
+    # )
+
+    # Does not take interval as a parameter (returns single average value)
     url = (
-        f"https://sentry.io/api/0/organizations/{ORG_SLUG}/stats_v2/"
+        f"https://sentry.io/api/0/organizations/{ORG_SLUG}/events/"
         "?query="
         f"project:{PROJECT_SLUG}"
-        "&interval=5m"
+        "&transaction=/forecast"
         "&statsPeriod=1d"
-        "&groupBy=category"
-        "&category=error"
-        "&field=sum(quantity)"
+        "&field=avg(transaction.duration)"
     )
     response = requests.get(url, headers=headers)
+    print(response.json().get("data"))
+
+    # Returns the average transaction duration for the last 24 hours in 5 minute
+    # intervals. Average value is returned as a key called "count"
+    url = (
+        f"https://sentry.io/api/0/organizations/{ORG_SLUG}/events-stats/"
+        "?query="
+        f"project:{PROJECT_SLUG}"
+        "&transaction=/forecast"
+        "&interval=5m"
+        "&statsPeriod=1d"
+        "&yAxis=avg(transaction.duration)"
+    )
+    response = requests.get(url, headers=headers)
+    print(response.json().get("data"))
 
     # Process events data ----
     events = pd.DataFrame(
