@@ -1,6 +1,7 @@
 # https://supabase.com/docs/guides/telemetry/metrics
 
 import os
+import random
 import re
 import threading
 import time
@@ -154,6 +155,10 @@ def detect_anomaly_nixtla(timestamps, usage_vals) -> bool:
 def cpu_detect_anomaly_loop():
     while True:
         last_timestamp, last_cpu_usage = cpu_queue.get()
+        # Randomly (10% chance) increase last_cpu_usage by 10x
+        if random.random() < 0.1:
+            print("Injecting anomaly in CPU usage!")
+            last_cpu_usage *= 10
         cpu_timestamp_window.append(last_timestamp)
         cpu_usage_window.append(last_cpu_usage)
         if detect_anomaly_nixtla(cpu_timestamp_window, cpu_usage_window):
@@ -168,6 +173,10 @@ def cpu_detect_anomaly_loop():
 def mem_detect_loop():
     while True:
         last_timestamp, last_mem_usage = mem_queue.get()
+        # Randomly (10% chance) increase last_mem_usage by 10x
+        if random.random() < 0.1:
+            print("Injecting anomaly in Memory usage!")
+            last_mem_usage *= 10
         mem_timestamp_window.append(last_timestamp)
         mem_usage_window.append(last_mem_usage)
         if detect_anomaly_nixtla(mem_timestamp_window, mem_usage_window):
