@@ -164,6 +164,16 @@ uv run python open_telemetry_test/otel_common/otel_predictive.py
 uv run python open_telemetry_test/prometheus/prometheus_read_metrics.py --metric_prefix=otel_
 ```
 
+## Running Supabase Infra Monitoring
+
+```bash
+# Run the anomaly detection script
+make supabase-detect-anomalies
+
+# In another terminal, run the dashboard
+make supabase-anomaly-dashboard
+```
+
 
 ## 🏃 Run tests
 

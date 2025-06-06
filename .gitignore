@@ -168,3 +168,6 @@ cython_debug/
 # Prometheus
 /open_telemetry_test/prometheus/data/*
 /open_telemetry_test/prometheus/prometheus-3.3.0.linux-amd64*
+
+# Datafiles
+*.csv

@@ -1,7 +1,7 @@
 # https://supabase.com/docs/guides/telemetry/metrics
 
+import glob
 import os
-import random
 import re
 import threading
 import time
@@ -9,7 +9,6 @@ from collections import deque
 from datetime import datetime
 from queue import Queue
 
-import numpy as np
 import pandas as pd
 import requests  # type: ignore
 from dotenv import load_dotenv
@@ -43,10 +42,29 @@ cpu_usage_window: deque = deque(maxlen=MAX_WINDOW_SIZE)
 mem_timestamp_window: deque = deque(maxlen=MAX_WINDOW_SIZE)
 mem_usage_window: deque = deque(maxlen=MAX_WINDOW_SIZE)
 
-prev_total = None
-prev_idle = None
+
+# cpu_data = []
+# mem_data = []
+# data_lock = threading.Lock()
 
 
+# --- CPU State ---
+class CPUTracker:
+    def __init__(self):
+        self.prev_total = None
+        self.prev_idle = None
+
+    def compute_usage(self, total, idle):
+        if self.prev_total is None:
+            self.prev_total, self.prev_idle = total, idle
+            return None
+        delta_total = total - self.prev_total
+        delta_idle = idle - self.prev_idle
+        self.prev_total, self.prev_idle = total, idle
+        return 100 * (1 - delta_idle / delta_total) if delta_total > 0 else None
+
+
+# --- METRICS ---
 def fetch_metrics():
     url = f"https://{SUPABASE_PROJECT}.supabase.co/customer/v1/privileged/metrics"
     auth = HTTPBasicAuth("service_role", SUPABASE_JWT)
@@ -59,164 +77,150 @@ def fetch_metrics():
         return None
 
 
-# --- PARSE TOTAL & IDLE ---
-def extract_total_and_idle(text):
-    total = 0.0
-    idle = 0.0
+def parse_prometheus_metrics(text):
+    metrics: dict = {}
     for line in text.splitlines():
-        if line.startswith("node_cpu_seconds_total"):
-            match = re.search(r'mode="(\w+)".*} ([\d\.e\+]+)', line)
-            if match:
-                mode, val = match.groups()
-                val = float(val)
-                total += val
-                if mode in ("idle", "iowait"):
-                    idle += val
+        if not line or line.startswith("#"):
+            continue
+        try:
+            key = line.split()[0].split("{")[0]
+            value = float(line.split()[-1])
+            metrics.setdefault(key, []).append((line, value))
+        except Exception:
+            continue
+    return metrics
+
+
+# --- PARSE TOTAL & IDLE ---
+def extract_total_and_idle(metrics):
+    total, idle = 0.0, 0.0
+    for line, val in metrics.get("node_cpu_seconds_total", []):
+        match = re.search(r'mode="(\w+)"', line)
+        if match:
+            mode = match.group(1)
+            total += val
+            if mode in ("idle", "iowait"):
+                idle += val
     return total, idle
 
 
-# --- COMPUTE INTERVAL USAGE ---
-def compute_cpu_usage(current_total, current_idle):
-    global prev_total, prev_idle
-    if prev_total is None or prev_idle is None:
-        prev_total, prev_idle = current_total, current_idle
-        return None  # skip first reading
-
-    # print(f"Previous Total: {prev_total}, Previous Idle: {prev_idle}")
-    # print(f"Current Total: {current_total}, Current Idle: {current_idle}")
-    delta_total = current_total - prev_total
-    delta_idle = current_idle - prev_idle
-    # print(f"Delta Total: {delta_total}, Delta Idle: {delta_idle}")
-
-    prev_total, prev_idle = current_total, current_idle
-
-    if delta_total <= 0:
-        return None  # avoid divide by zero or invalid values
-
-    return 100 * (1 - delta_idle / delta_total)
-
-
-def extract_memory_usage(text):
+def extract_memory_usage(metrics):
     mem_total = mem_available = None
-    for line in text.splitlines():
-        if "node_memory_MemTotal_bytes" in line and "{" in line:
-            mem_total = float(line.split()[-1])
-        elif "node_memory_MemAvailable_bytes" in line and "{" in line:
-            mem_available = float(line.split()[-1])
-        if mem_total is not None and mem_available is not None:
-            break
-    if mem_total and mem_available:
-        used = mem_total - mem_available
-        return 100 * used / mem_total
-    return None
+    for _, val in metrics.get("node_memory_MemTotal_bytes", []):
+        mem_total = val
+    for _, val in metrics.get("node_memory_MemAvailable_bytes", []):
+        mem_available = val
+    return (
+        100 * (mem_total - mem_available) / mem_total
+        if mem_total and mem_available
+        else None
+    )
 
 
 # --- DETECTION ---
-def detect_anomaly_zscore(timestamps, usage_vals, threshold=ANOMALY_THRESHOLD) -> bool:
-    if len(usage_vals) < 10:
+def detect_anomaly_nixtla(timestamps, usage_vals, export_path=None):
+    df = pd.DataFrame({"ds": timestamps, "y": usage_vals})
+    df["ds"] = pd.to_datetime(df["ds"])
+    df = df.set_index("ds").resample("1min").mean().interpolate().reset_index()
+
+    if export_path:
+        df.to_csv(export_path, index=False)
+        print(f"📁 Exported: {export_path}")
+
+    if len(df) < 10:
         return False
-    mean = np.mean(usage_vals)
-    std = np.std(usage_vals)
-    latest = usage_vals[-1]
-    z = (latest - mean) / std if std > 0 else 0
-    return abs(z) > threshold
-
-
-def detect_anomaly_nixtla(timestamps, usage_vals) -> bool:
-    data = pd.DataFrame({"ds": timestamps, "y": usage_vals})
-    # Resample to minute frequency if not already
-    data["ds"] = pd.to_datetime(data["ds"])
-    data = data.set_index("ds").resample("1min").mean().interpolate().reset_index()
-    print(data.tail())
-
-    nixtla_client = NixtlaClient(
-        # defaults to os.environ.get("NIXTLA_API_KEY")
-    )
 
     try:
-        anomaly_online = nixtla_client.detect_anomalies_online(
-            data,
+        client = NixtlaClient()
+        result = client.detect_anomalies_online(
+            df,
             time_col="ds",
             target_col="y",
-            freq="min",  # Specify the frequency of the data
-            h=1,  # Specify the forecast horizon
-            level=99,  # Set the confidence level for anomaly detection
-            detection_size=1,  # Number of steps to analyze for anomalies
+            freq="min",
+            h=1,
+            level=99,
+            detection_size=1,
         )
-        anomaly = anomaly_online.tail(1)["anomaly"][0]
-        print(f"Anomaly detected: {anomaly}")
+        return result.tail(1)["anomaly"].iloc[0]
     except Exception as e:
-        print(f"⚠️ Error detecting anomaly: {e}")
-        anomaly = False
-
-    return anomaly
+        print(f"⚠️ Nixtla error: {e}")
+        return False
 
 
-def cpu_detect_anomaly_loop():
+def detect_loop(name, queue, ts_window, usage_window, export_path):
     while True:
-        last_timestamp, last_cpu_usage = cpu_queue.get()
-        # Randomly (10% chance) increase last_cpu_usage by 10x
-        if random.random() < 0.1:
-            print("Injecting anomaly in CPU usage!")
-            last_cpu_usage *= 10
-        cpu_timestamp_window.append(last_timestamp)
-        cpu_usage_window.append(last_cpu_usage)
-        if detect_anomaly_nixtla(cpu_timestamp_window, cpu_usage_window):
-            print(
-                f"[{last_timestamp}] 🚨 Anomaly detected! CPU = {last_cpu_usage:.2f}%"
-            )
+        ts, usage = queue.get()
+        ts_window.append(ts)
+        usage_window.append(usage)
+
+        # with data_lock:
+        #     store.append({"timestamp": ts, "value": usage})
+
+        if detect_anomaly_nixtla(ts_window, usage_window, export_path):
+            print(f"[{ts}] 🚨 {name} Anomaly: {usage:.2f}%")
         else:
-            print(f"[{last_timestamp}] CPU Usage OK = {last_cpu_usage:.2f}%")
-        cpu_queue.task_done()
+            print(f"[{ts}] {name} OK: {usage:.2f}%")
+
+        queue.task_done()
 
 
-def mem_detect_loop():
+# --- SCRAPE LOOP ---
+def scrape_loop():
+    tracker = CPUTracker()
+    next_run = time.monotonic()
     while True:
-        last_timestamp, last_mem_usage = mem_queue.get()
-        # Randomly (10% chance) increase last_mem_usage by 10x
-        if random.random() < 0.1:
-            print("Injecting anomaly in Memory usage!")
-            last_mem_usage *= 10
-        mem_timestamp_window.append(last_timestamp)
-        mem_usage_window.append(last_mem_usage)
-        if detect_anomaly_nixtla(mem_timestamp_window, mem_usage_window):
-            print(f"[{last_timestamp}] 🚨 MEMORY Anomaly: {last_mem_usage:.2f}%")
-        else:
-            print(f"[{last_timestamp}] MEM Usage OK = {last_mem_usage:.2f}%")
-        mem_queue.task_done()
-
-
-# --- SCRAPER LOOP (TIMED) ---
-def scrape_metrics_loop():
-    next_run = time.time()
-    while True:
-        timestamp = datetime.utcnow().isoformat()
-
+        ts = datetime.utcnow().isoformat()
         text = fetch_metrics()
         if text:
-            # Get CPU Usage ----
-            total, idle = extract_total_and_idle(text)
-            cpu_usage = compute_cpu_usage(total, idle)
-
-            # get Memory Usage ----
-            mem_usage = extract_memory_usage(text)
-
-            # Add to queue ----
+            metrics = parse_prometheus_metrics(text)
+            total, idle = extract_total_and_idle(metrics)
+            cpu_usage = tracker.compute_usage(total, idle)
+            mem_usage = extract_memory_usage(metrics)
             if cpu_usage is not None:
-                cpu_queue.put((timestamp, cpu_usage))
+                cpu_queue.put((ts, cpu_usage))
             if mem_usage is not None:
-                mem_queue.put((timestamp, mem_usage))
-
-        # print(f"Time: {timestamp}, CPU Usage: {usage}")
-        # wait exactly until next interval
+                mem_queue.put((ts, mem_usage))
         next_run += INTERVAL
-        sleep_time = max(0, next_run - time.time())
-        time.sleep(sleep_time)
+        time.sleep(max(0, next_run - time.monotonic()))
 
 
 # --- MAIN ---
 if __name__ == "__main__":
-    print("⏳ Starting CPU & Memory monitor with anomaly detection...")
-    threading.Thread(target=cpu_detect_anomaly_loop, daemon=True).start()
-    threading.Thread(target=mem_detect_loop, daemon=True).start()
-    scrape_metrics_loop()
+    print("⏳ Monitoring started...")
+
+    # Delete existing metrics files
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    for f in glob.glob(os.path.join(BASE_DIR, "*_metrics.csv")):
+        try:
+            os.remove(f)
+            print(f"🗑️ Deleted: {f}")
+        except Exception as e:
+            print(f"⚠️ Could not delete {f}: {e}")
+
+    threading.Thread(
+        target=detect_loop,
+        args=(
+            "CPU",
+            cpu_queue,
+            cpu_timestamp_window,
+            cpu_usage_window,
+            # cpu_data,
+            os.path.join(BASE_DIR, "cpu_metrics.csv"),
+        ),
+        daemon=True,
+    ).start()
+    threading.Thread(
+        target=detect_loop,
+        args=(
+            "MEM",
+            mem_queue,
+            mem_timestamp_window,
+            mem_usage_window,
+            os.path.join(BASE_DIR, "memory_metrics.csv"),
+        ),
+        daemon=True,
+    ).start()
+    try:
+        scrape_loop()
+    except KeyboardInterrupt:
+        print("🛑 Exiting...")

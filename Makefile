@@ -27,3 +27,11 @@ start-otel-common-docker:
    		-v ./otel_common_collector_config.yaml:/etc/otelcol-contrib/config.yaml \
    		otel/opentelemetry-collector-contrib:latest \
    		--config /etc/otelcol-contrib/config.yaml
+
+supabase-detect-anomalies:
+	cd open_telemetry_test/supabase && \
+	uv run python performance.py
+
+supabase-anomaly-dashboard:
+	cd open_telemetry_test/supabase && \
+	uv run python dashboard.py
