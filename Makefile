@@ -1,6 +1,6 @@
 devenv:
 	@echo "Creating development environment..."
-	uv sync --extra dev --frozen
+	uv sync --frozen
 	uv run pre-commit install
 
 split-tests:
